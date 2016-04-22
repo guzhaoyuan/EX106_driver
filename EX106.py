@@ -12,18 +12,45 @@ def checksum(data):
 
     if (crc <= 0x0F):
         crc = crc & 0xFF
-    print "crc= "+str(int(crc))
+    #print "crc= "+str(int(crc))
     return crc
 
-def parse(pack):
+def parse(respond):
+	pack= binascii.hexlify(respond) 
 	if pack[0:2] == '00':
 		pack = pack[2:]
+	if pack[0:2] != 'ff':
+		return ''
 	if pack[2:4] == 'ff':
-		print 'id='+pack[4:6]
-		print 'error='+pack[8:10]
+		return [pack[4:6],pack[8:10]]#[id , error]
+		#print 'id='+pack[4:6]
+		#print 'error='+pack[8:10]
 	else:
-		print 'id='+pack[2:4]
-		print 'error='+pack[6:8]
+		return [pack[2:4],pack[6:8]]
+		#print 'id='+pack[2:4]
+		#print 'error='+pack[6:8]
+
+def scan():
+	for num in range(1,256):
+		ping(num)
+
+def ping(id):
+	print "ping id: %d" %id
+	#write(id,1)
+	total = id +3
+	crc = checksum(total)
+	data =[id,2,instr]
+	data.append(crc)
+	package = "".join(map(chr,[0xFF,0xFF] + data))
+	ser.flushOutput();
+	time.sleep(0.1)
+	ser.write(package)
+	respond = ser.read(size=7)
+	result = parse(respond)
+	#print result
+	if result != '':
+		print "find motor id: %d"%id
+
 
 def write(id,instr,*para):
 	paras = list(para)
@@ -37,9 +64,7 @@ def write(id,instr,*para):
 	time.sleep(0.1)
 	ser.write(package)
 	respond = ser.read(size=7)
-	res= binascii.hexlify(respond) 
-	parse(res)
-
+	result = parse(respond)
 
 addr = 0x01
 length = 0x05
