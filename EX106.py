@@ -49,7 +49,6 @@ def ping(id):
 		print "find motor id: %d"%id
 		return id
 
-
 def write(id,instr,*para):
 	paras = list(para)
 	total = id + len(paras) + 2 + instr + sum(paras)
