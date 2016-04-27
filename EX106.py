@@ -4,7 +4,7 @@ import time
 import binascii
 
 #ser = serial.Serial('/dev/tty.usbserial',57600,timeout=0.25)
-ser = serial.Serial('/dev/tty.wchusbserial1420',57600,timeout=0.25)
+#ser = serial.Serial('/dev/tty.wchusbserial1420',57600,timeout=0.25)
 
 def checksum(data):
     data = 0xFF & data
@@ -35,10 +35,9 @@ def scan():
 
 def ping(id):
 	print "ping id: %d" %id
-	#write(id,1)
 	total = id +3
 	crc = checksum(total)
-	data =[id,2,instr]
+	data =[id,2,1]
 	data.append(crc)
 	package = "".join(map(chr,[0xFF,0xFF] + data))
 	ser.flushOutput();
@@ -65,5 +64,18 @@ def write(id,instr,*para):
 	respond = ser.read(size=7)
 	result = parse(respond)
 
-ser.flushOutput();
-ser.flushInput();
+def syncWrite(addressToWrite,*servoList):#command for each dynamixel is the same but param imput is not same
+	servoLists = list(servoList)
+	data = [0XFE,len(servoLists)*len(servoLists[0])+4,0x83,addressToWrite,len(servoLists[0])-1]
+	for num in servoLists:
+		data += num	
+	total = sum(data)
+	crc = checksum(total)
+	data.append(crc)
+	package = "".join(map(chr,[0xFF,0xFF] + data))
+	ser.flushOutput();
+	time.sleep(0.1)
+	ser.write(package)
+
+#ser.flushOutput()
+#ser.flushInput()
