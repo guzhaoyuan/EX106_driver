@@ -23,9 +23,9 @@ def write_goal(id, position, speed = 0x3FF):
 	servo = [id ,position&0xFF,position>>8,speed&0xFF,speed>>8]
 	EX106.syncWrite(0x1E,servo)
 
-def sync_write_goal(id1,position1,id2,position2,speed1=0x3FF,speed2=0x3FF):
+def sync_write_goal(id1,position1,id2,position2,speed1=0x20,speed2=0x20):
 	servo1 = [id1, position1&0xFF,position1>>8,speed1&0xFF,speed1>>8]
 	servo2 = [id2, position2&0xFF,position2>>8,speed2&0xFF,speed2>>8]
 	EX106.syncWrite(0x1E,servo1,servo2)
 
-write_goal(1,1000)
+sync_write_goal(1,2000,2,1600)
