@@ -63,7 +63,9 @@ def write(id,instr,*para):
 	respond = ser.read(size=7)
 	result = parse(respond)
 
-def syncWrite(addressToWrite,*servoList):#command for each dynamixel is the same but param imput is not same
+#command for each dynamixel is the same but param imput is not same
+#servo = [id ,position&0xFF,position>>8,speed&0xFF,speed>>8]
+def syncWrite(addressToWrite,*servoList):
 	servoLists = list(servoList)
 	data = [0XFE,len(servoLists)*len(servoLists[0])+4,0x83,addressToWrite,len(servoLists[0])-1]
 	for num in servoLists:
