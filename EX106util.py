@@ -1,17 +1,28 @@
+# -*- coding: utf-8 -*- 
 import EX106
 import time
 import readIMU
 
 servo1max = 3575
 servo1min = 711
-servo2max = 1858
+servo2max = 3072
 servo2min = 113
 
+init_pitch = 104.3
+init_yaw = 104.3
+
+current_pitch = init_pitch
+current_yaw = init_yaw
+
+#输入0-208.6°，中间值为104.3°;输出0-0xFFF，中间值为0x800
+def angelToPosition(angel):
+	return int(angel*0xFFF/208.6)
+
 #将电机的数据直接转化为sync_write可以读的格式
-def generate_servo(id,position,speed):
+def generate_servo(id,position,speed = 0x200):
 	return [id ,position&0xFF,position>>8,speed&0xFF,speed>>8]
 
-def write_goal(id, position, speed = 0x40):
+def write_goal(id, position, speed = 0x200):
 	if id == 1:
 		if position > servo1max:
 			position = servo1max
@@ -30,45 +41,86 @@ def write_goal(id, position, speed = 0x40):
 	EX106.syncWrite(0x1E,servo)
 
 #该函数用来控制2个电机，速度默认为0x40较慢，可以直接给两个电机写位置,前提是不超出电机转动范围
-def sync_write_goal(id1,position1,id2,position2,speed1=0x40,speed2=0x40):
+def sync_write_goal(id1,position1,id2,position2,speed1=0x200,speed2=0x200):
 	servo1 = 0
 	servo2 = 0
-	if position > servo1max:
-		position = servo1max
+	if position1 > servo1max:
+		position1 = servo1max
 		print "exceed servo1 max"
-	elif position < servo1min:
-		position = servo1min
+	elif position1 < servo1min:
+		position1 = servo1min
 		print "exceed servo1 min"
-	else
+	else:
 		servo1 = generate_servo(id1,position1,speed1)
-	if position > servo2max:
-		position = servo2max
+	
+	if position2 > servo2max:
+		position2 = servo2max
 		print "exceed servo2 max"
-	elif position < servo2min:
-		position = servo2min
+	elif position2 < servo2min:
+		position2 = servo2min
 		print "exceed servo2 min"
-	else
+	else:
 		servo2 = generate_servo(id2,position2,speed2)
-	if ((servo1 != 0)&&(servo2 != 0)):
+	if ((servo1 != 0) and (servo2 != 0)):
 		EX106.syncWrite(0x1E,servo1,servo2)
+
+def sync_write_angel(id1,angel1,id2,angel2,speed1=0x200,speed2=0x200):
+	sync_write_goal(id1,angelToPosition(angel1),id2,angelToPosition(angel2),speed1,speed2)
 
 #该函数用于保持头部平衡
 def keep_position(target,pose):
-	if abs(pose[1] - target [1])< 10:
+	print("target= "),
+	print(target),
+	print("pose= "),
+	print(pose)
+	if abs(pose[1] - target[1])< 3:
 		pitchAdd = 0
-	else
+	else:
 		pitchAdd = target[1] - pose[1]
-	if abs(pose[2] - target [2])< 10:
+	if abs(pose[2] - target[2])< 3:
 		yawAdd = 0
-	else
+	else:
 		yawAdd = target[2] - pose[2]
+	global current_pitch
+	global current_yaw
 	current_pitch += pitchAdd
 	current_yaw += yawAdd
-	sync_write_goal(1,current_yaw,2,current_pitch)
+	print("command yaw:"),
+	print(current_yaw),
+	print("command pitch"),
+	print(current_pitch)
+	sync_write_angel(1,current_yaw,2,current_pitch)
 
 
 if __name__ == '__main__':
-	target = [0,0x800，0x800]#roll pitch yaw,其中roll没用
-  while True:
-  	pose = readIMU.readData()
-  	keep_position(target,pose)
+	target = [0,0,0]#roll pitch yaw,其中roll没用
+
+	#EX106.syncWrite(0x1E,generate_servo(1,init_pitch),generate_servo(2,init_yaw))
+	sync_write_angel(1,init_yaw,2,init_pitch)
+
+	for num in range(1,100):#读200组数据扔掉
+		pose = readIMU.readData()
+	for num in range(1,11):#读十组数据做平均做出初始值
+		pose = readIMU.readData()
+		target[0] += pose[0]
+		target[1] += pose[1]
+		target[2] += pose[2]
+	target[0] /= 10
+	target[1] /= 10
+	target[2] /= 10
+	while True:
+		delay = 4
+		temp = [0,0,0]
+		for num in range(1,delay+1):#读十组数据做平均做出初始值
+			pose = readIMU.readData()
+			temp[0] += pose[0]
+			temp[1] += pose[1]
+			temp[2] += pose[2]
+		temp[0] /= delay
+		temp[1] /= delay
+		temp[2] /= delay
+		#pose = readIMU.readData()
+		readIMU.flush()
+		#print(pose)
+		#print(target)
+  		keep_position(target,temp)
