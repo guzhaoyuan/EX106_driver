@@ -2,6 +2,7 @@
 import EX106
 import time
 import readIMU
+import pid
 
 servo1max = 3575
 servo1min = 711
@@ -91,7 +92,7 @@ def keep_position(target,pose):
 
 	global current_pitch
 	global current_yaw
-	offset = calc_pid(target,pose)#得到输出的偏移值
+	offset = pid.calc_pid(target,pose)#得到输出的偏移值
 	current_pitch += offset[1]#修改pitch输出
 	current_yaw += offset[2]#修改yaw输出
 
