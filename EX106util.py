@@ -3,6 +3,7 @@ import EX106
 import time
 import readIMU
 import pid
+from operator import add
 
 servo1max = 3575
 servo1min = 711
@@ -102,6 +103,14 @@ def keep_position(target,pose):
 	print(current_pitch)
 	sync_write_angel(1,current_yaw,2,current_pitch)
 
+#读num组数据做平均做出初始值
+def get_average_IMU(num):
+	pose = [0,0,0]
+	for num in range(1,num+1):
+		pose = map(add, pose, readIMU.readData())
+	pose[:] = [x / num for x in pose]
+	return pose
+
 #主函数
 if __name__ == '__main__':
 	target = [0,0,0]#roll pitch yaw,其中roll没用
@@ -111,24 +120,10 @@ if __name__ == '__main__':
 
 	for num in range(1,100):#读200组数据扔掉
 		pose = readIMU.readData()
-	for num in range(1,11):#读十组数据做平均做出初始值
-		pose = readIMU.readData()
-		target[0] += pose[0]
-		target[1] += pose[1]
-		target[2] += pose[2]
-	target[0] /= 10
-	target[1] /= 10
-	target[2] /= 10
+	
+	target = get_average_IMU(10)#读10组数据做平均做出初始值
+	
 	while True:
-		delay = 4
-		temp = [0,0,0]
-		for num in range(1,delay+1):#读十组数据做平均做出初始值
-			pose = readIMU.readData()
-			temp[0] += pose[0]
-			temp[1] += pose[1]
-			temp[2] += pose[2]
-		temp[0] /= delay
-		temp[1] /= delay
-		temp[2] /= delay
+		temp = get_average_IMU(4)#读4组数据做平均作为当前姿态
 		readIMU.flush()
   	keep_position(target,temp)
