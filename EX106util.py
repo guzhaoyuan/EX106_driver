@@ -11,6 +11,8 @@ servo2min = 113
 init_pitch = 104.3
 init_yaw = 104.3
 
+#当前的位置
+#初始化时，当前位置等于初始位置
 current_pitch = init_pitch
 current_yaw = init_yaw
 
@@ -22,6 +24,7 @@ def angelToPosition(angel):
 def generate_servo(id,position,speed = 0x200):
 	return [id ,position&0xFF,position>>8,speed&0xFF,speed>>8]
 
+#给单个电机写一个位置，位置表示为数值
 def write_goal(id, position, speed = 0x200):
 	if id == 1:
 		if position > servo1max:
@@ -44,6 +47,7 @@ def write_goal(id, position, speed = 0x200):
 def sync_write_goal(id1,position1,id2,position2,speed1=0x200,speed2=0x200):
 	servo1 = 0
 	servo2 = 0
+	#软限位防止角度过大
 	if position1 > servo1max:
 		position1 = servo1max
 		print "exceed servo1 max"
@@ -52,7 +56,7 @@ def sync_write_goal(id1,position1,id2,position2,speed1=0x200,speed2=0x200):
 		print "exceed servo1 min"
 	else:
 		servo1 = generate_servo(id1,position1,speed1)
-	
+	#软限位防止角度过大
 	if position2 > servo2max:
 		position2 = servo2max
 		print "exceed servo2 max"
@@ -61,9 +65,12 @@ def sync_write_goal(id1,position1,id2,position2,speed1=0x200,speed2=0x200):
 		print "exceed servo2 min"
 	else:
 		servo2 = generate_servo(id2,position2,speed2)
+	#如果两个角度都在合理范围内，则转动电机到目标位置
 	if ((servo1 != 0) and (servo2 != 0)):
-		EX106.syncWrite(0x1E,servo1,servo2)
+		EX106.syncWrite(0x1E,servo1,servo2)#EX106.py中的底层连写函数
 
+
+#将电机的位置封装为角度，中值为104.3°
 def sync_write_angel(id1,angel1,id2,angel2,speed1=0x200,speed2=0x200):
 	sync_write_goal(id1,angelToPosition(angel1),id2,angelToPosition(angel2),speed1,speed2)
 
@@ -81,17 +88,20 @@ def keep_position(target,pose):
 		yawAdd = 0
 	else:
 		yawAdd = target[2] - pose[2]
+
 	global current_pitch
 	global current_yaw
-	current_pitch += pitchAdd
-	current_yaw += yawAdd
+	offset = calc_pid(target,pose)#得到输出的偏移值
+	current_pitch += offset[1]#修改pitch输出
+	current_yaw += offset[2]#修改yaw输出
+
 	print("command yaw:"),
 	print(current_yaw),
 	print("command pitch"),
 	print(current_pitch)
 	sync_write_angel(1,current_yaw,2,current_pitch)
 
-
+#主函数
 if __name__ == '__main__':
 	target = [0,0,0]#roll pitch yaw,其中roll没用
 
@@ -119,8 +129,5 @@ if __name__ == '__main__':
 		temp[0] /= delay
 		temp[1] /= delay
 		temp[2] /= delay
-		#pose = readIMU.readData()
 		readIMU.flush()
-		#print(pose)
-		#print(target)
-  		keep_position(target,temp)
+  	keep_position(target,temp)
