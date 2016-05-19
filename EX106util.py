@@ -94,8 +94,9 @@ def keep_position(target,pose):
 	global current_pitch
 	global current_yaw
 	offset = pid.calc_pid(target,pose)#得到输出的偏移值
-	current_pitch += offset[1]#修改pitch输出
-	current_yaw += offset[2]#修改yaw输出
+	print(offset)
+	current_pitch -= offset[1]#修改pitch输出
+	current_yaw -= offset[2]#修改yaw输出
 
 	print("command yaw:"),
 	print(current_yaw),
@@ -118,12 +119,12 @@ if __name__ == '__main__':
 	#EX106.syncWrite(0x1E,generate_servo(1,init_pitch),generate_servo(2,init_yaw))
 	sync_write_angel(1,init_yaw,2,init_pitch)
 
-	for num in range(1,100):#读200组数据扔掉
+	for num in range(1,100): #读200组数据扔掉
 		pose = readIMU.readData()
 	
-	target = get_average_IMU(10)#读10组数据做平均做出初始值
+	target = get_average_IMU(10) #读10组数据做平均做出初始值
 	
 	while True:
-		temp = get_average_IMU(4)#读4组数据做平均作为当前姿态
+		temp = get_average_IMU(2) #读4组数据做平均作为当前姿态
 		readIMU.flush()
-  	keep_position(target,temp)
+  		keep_position(target,temp)
