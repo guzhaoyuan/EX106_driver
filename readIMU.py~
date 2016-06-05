@@ -4,7 +4,7 @@ import serial
 import time
 import binascii
 
-IMUser = serial.Serial('/dev/ttyUSB1',57600,timeout=0.025)
+IMUser = serial.Serial('/dev/tty.usbmodem1411',57600,timeout=0.025)
 
 def readData():
 	data = ""
