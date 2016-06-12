@@ -3,8 +3,8 @@ import serial
 import time
 import binascii
 
-#ser = serial.Serial('/dev/tty.usbserial',57600,timeout=0.25)
-ser = serial.Serial('/dev/tty.wchusbserial1420',57600,timeout=0.25)
+ser = serial.Serial('/dev/ttyUSB0',57600,timeout=0.25)#for linux
+#ser = serial.Serial('/dev/tty.wchusbserial1420',57600,timeout=0.25)#for mac
 
 def checksum(data):
     data = 0xFF & data
