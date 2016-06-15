@@ -3,8 +3,9 @@ import serial
 import time
 import binascii
 
-#ser = serial.Serial('/dev/tty.usbserial',57600,timeout=0.25)
-ser = serial.Serial('/dev/tty.wchusbserial1420',57600,timeout=0.25)
+port = '/dev/ttyUSB0'
+ser = serial.Serial(port, baudrate=57600,bytesize=serial.EIGHTBITS,parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,timeout=0.025,write_timeout=0.025)
+
 
 def checksum(data):
     data = 0xFF & data
