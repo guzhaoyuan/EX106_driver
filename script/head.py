@@ -1,9 +1,17 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 import EX106
 import time
 import readIMU
 import pid
+import rospy
 from operator import add
+from beginner_tutorials.msg import Num
+from gait.msg import head_angle_msg
+
+pub = rospy.Publisher('gait/head_angle',head_angle_msg)
+rospy.init_node('IMU_data',anonymous=True)
+
 
 servo1max = 3575
 servo1min = 711
@@ -82,7 +90,6 @@ def keep_position(target,pose):
 	print(target),
 	print("pose= "),
 	print(pose)
-	#小于3°不转角
 	if abs(pose[1] - target[1])< 3:
 		pitchAdd = 0
 	else:
@@ -91,7 +98,7 @@ def keep_position(target,pose):
 		yawAdd = 0
 	else:
 		yawAdd = target[2] - pose[2]
-	
+
 	global current_pitch
 	global current_yaw
 	offset = pid.calc_pid(target,pose)#得到输出的偏移值
@@ -129,5 +136,6 @@ if __name__ == '__main__':
 	
 	while True:
 		temp = get_average_IMU(2) #读4组数据做平均作为当前姿态
+		pub.publish(head_angle_msg(temp[2],temp[1]))
 		readIMU.flush()
-  	keep_position(target,temp)
+  		keep_position(target,temp)
