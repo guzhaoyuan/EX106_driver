@@ -17,14 +17,14 @@ def sync_write_angel_client(yaw_angel, pitch_angel,duration):#tobe test
 def sync_write_position_client(yaw, pitch,duration):#tested
     rospy.wait_for_service('head_service')
 
-    if yaw_angel > soft_limit:
-        yaw_angel = soft_limit
-    elif yaw_angel < -soft_limit:
-        yaw_angel = -soft_limit
-    if pitch_angel > soft_limit:
-        pitch_angel = soft_limit
-    elif pitch_angel < -soft_limit:
-        pitch_angel = -soft_limit
+    if yaw > soft_limit:
+        yaw = soft_limit
+    elif yaw < -soft_limit:
+        yaw = -soft_limit
+    if pitch > soft_limit:
+        pitch = soft_limit
+    elif pitch < -soft_limit:
+        pitch = -soft_limit
 
     try:
         sync_write = rospy.ServiceProxy('head_service', head_decision)
@@ -45,3 +45,4 @@ if __name__ == "__main__":
     time.sleep(2)
     print "result = %s"%(sync_write_position_client(-1000, 1000,0))
     time.sleep(2)
+    print "result = %s"%(sync_write_angel_client(0, 0,0))
