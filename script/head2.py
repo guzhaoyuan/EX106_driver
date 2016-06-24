@@ -9,7 +9,9 @@ import head_client
 from operator import add
 from Head.msg import head_pose 
 #from gait.msg import head_angle_msg
+from Head.srv import head_control
 
+Pi = 3.1415926
 pub = rospy.Publisher('gait/head_angle',head_pose,queue_size=101)
 rospy.init_node('IMU_data',anonymous=True)
 
@@ -22,6 +24,20 @@ init_yaw = 0
 #初始化时，当前位置等于初始位置
 current_pitch = init_pitch
 current_yaw = init_yaw
+
+#callback function receive pitch[-Pi/2,Pi/2] and yaw[-Pi,Pi] and call security service directly
+def handle_head_control(req):
+	pitch = (req.pitch * 2 / Pi)
+	yaw = (req.yaw / Pi)
+	head_client.sync_write_angel_client(yaw,pitch,0)
+
+#server init, receive yaw and pitch
+def head_control_server():
+	rospy.init_node('head_control_server')
+	s = rospy.Service('head_control',head_control,handle_head_control)
+	print "head control server ready"
+	ros.spin()
+
 
 #该函数用于保持头部平衡
 def keep_position(target,pose):

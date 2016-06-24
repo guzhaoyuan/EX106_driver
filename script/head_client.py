@@ -4,9 +4,14 @@ import sys
 import rospy
 import time
 from gait.srv import head_decision
+from Head.msg import head_servo_angel
 
 position_max = 151875 #151875 = 180 degree ; -151875 = -180 degree
 soft_limit = 2000 #servo soft list
+
+#publish msg to head_servo_angel.msg 
+pub = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
+rospy.init_node('head_data',anonymous=True)
 
 #because the /head_decision is upside-down, so here we put yaw as first parameter
 def sync_write_angel_client(yaw_angel, pitch_angel,duration):#tobe test
@@ -28,7 +33,10 @@ def sync_write_position_client(yaw, pitch,duration):#tested
 
     try:
         sync_write = rospy.ServiceProxy('head_service', head_decision)
-        result = sync_write(yaw, pitch,duration)
+        result = sync_write(yaw,pitch,duration)
+	#if result != 0:
+	pub.publish(head_servo_angel(pitch,yaw))
+	#send servo pose every after servo move
         return result
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
