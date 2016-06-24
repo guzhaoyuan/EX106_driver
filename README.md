@@ -18,3 +18,6 @@
 
 - pySerial
 - time
+
+##当前完成度
+可以使用head.py 读取IMU数据控制EX106保持PID平衡
