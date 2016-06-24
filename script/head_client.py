@@ -6,7 +6,7 @@ import time
 from gait.srv import head_decision
 
 position_max = 151875 #151875 = 180 degree ; -151875 = -180 degree
-soft_limit = 2000 #
+soft_limit = 2000 #servo soft list
 
 #because the /head_decision is upside-down, so here we put yaw as first parameter
 def sync_write_angel_client(yaw_angel, pitch_angel,duration):#tobe test

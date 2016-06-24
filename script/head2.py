@@ -10,7 +10,7 @@ from operator import add
 from Head.msg import head_pose 
 #from gait.msg import head_angle_msg
 
-pub = rospy.Publisher('gait/head_angle',head_pose)
+pub = rospy.Publisher('gait/head_angle',head_pose,queue_size=101)
 rospy.init_node('IMU_data',anonymous=True)
 
 
@@ -42,9 +42,9 @@ def keep_position(target,pose):
 	global current_yaw
 	offset = pid.calc_pid(target,pose)#得到输出的偏移值
 	print(offset)
-	if (current_pitch < servo2max) and (current_pitch > servo2min):
+	if (abs(current_pitch) < head_client.soft_limit):
 		current_pitch -= offset[0]#修改pitch输出
-	if (current_pitch < servo1max) and (current_pitch > servo1min):
+	if (abs(current_yaw) < head_client.soft_limit):
 		current_yaw -= offset[2]#修改yaw输出
 
 	print("command yaw:"),

@@ -1,11 +1,14 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
 import serial
 import time
 import binascii
 
-IMUser = serial.Serial('/dev/ttyACM0',57600,timeout=0.025)#for linux
+port = '/dev/ttyACM0'
+#IMUser = serial.Serial('/dev/ttyACM0',57600,timeout=0.025)#for linux
 #IMUser = serial.Serial('/dev/tty.usbmodem1411',57600,timeout=0.025)#for mac
+IMUser = serial.Serial(port, baudrate=57600,bytesize=serial.EIGHTBITS,parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
 
 def readData():
 	data = ""
