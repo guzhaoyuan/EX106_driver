@@ -7,8 +7,8 @@ import pid
 import rospy
 import head_client
 from operator import add
-from beginner_tutorials.msg import head_pose 
-from gait.msg import head_angle_msg
+from Head.msg import head_pose 
+#from gait.msg import head_angle_msg
 
 pub = rospy.Publisher('gait/head_angle',head_pose)
 rospy.init_node('IMU_data',anonymous=True)
