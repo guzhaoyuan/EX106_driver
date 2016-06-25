@@ -14,11 +14,9 @@ from Head.msg import head_servo_angel
 
 
 Pi = 3.1415926
-#publish msg to head_angel.msg
-pub_imu = rospy.Publisher('gait/head_angle',head_pose,queue_size=101)
-#init a node
-rospy.init_node('Head_data',anonymous=True)
 
+#publish msg to head_servo_angel.msg 
+pub_servo = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
 
 #servo init angel
 init_pitch = 0
@@ -31,16 +29,17 @@ current_yaw = init_yaw
 
 #callback function receive pitch[-Pi/2,Pi/2] and yaw[-Pi,Pi] and call security service directly
 def handle_head_control(req):
-	pitch = (req.pitch * 2 / Pi)
-	yaw = (req.yaw / Pi)
+	pitch = (req.pitch)
+	yaw = (req.yaw)
 	head_client.sync_write_angel_client(yaw,pitch,0)
+	return 0
 
 #server init, receive yaw and pitch
 def head_control_server():
 	rospy.init_node('head_control_server')
 	s = rospy.Service('head_control_withPID',head_control,handle_head_control)
 	print "head control server ready"
-	ros.spin()
+	rospy.spin()
 
 
 #该函数用于保持头部平衡
@@ -76,31 +75,6 @@ def keep_position(target,pose):
 	pub_servo.publish(current_pitch,current_yaw)
         #send servo pose every after servo move
 
-
-#读num组数据做平均做出初始值
-def get_average_IMU(num):
-	pose = [0,0,0]
-	for num in range(1,num+1):
-		pose = map(add, pose, readIMU.readData())
-	pose[:] = [x / num for x in pose]
-	return pose
-
 #主函数
 if __name__ == '__main__':
-	target = [0,0,0]#pitch roll yaw,其中roll没用
-
-	#init head posion (0 , 0)
-	head_client.sync_write_angel_client(init_yaw,init_pitch,0)
-	pub_imu.publish(init_pitch,init_yaw)
-        #send servo pose every after servo move
-
-	for num in range(1,100): #读200组数据扔掉
-		pose = readIMU.readData()
-	
-	target = get_average_IMU(10) #读10组数据做平均做出初始值
-	
-	while True:
-		temp = get_average_IMU(2) #读4组数据做平均作为当前姿态
-		pub_imu.publish(temp[2],temp[0])
-		readIMU.flush()
-  		#keep_position(target,temp)
+	head_control_server()	
