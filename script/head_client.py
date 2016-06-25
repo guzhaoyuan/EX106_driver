@@ -10,9 +10,9 @@ soft_limit = 2000 #servo soft list
 
 #because the /head_decision is upside-down, so here we put yaw as first parameter
 def sync_write_angel_client(yaw_angel, pitch_angel,duration):#tobe test
-    yaw = yaw_angel * position_max / 180
-    pitch = pitch_angel * position_max / 180
-    sync_write_position_client(yaw,pitch,duration)
+    #yaw = yaw_angel * position_max / 180
+    #pitch = pitch_angel * position_max / 180
+    sync_write_position_client(yaw_angel,pitch_angel,duration)
 
 def sync_write_position_client(yaw, pitch,duration):#tested
     rospy.wait_for_service('head_service')
