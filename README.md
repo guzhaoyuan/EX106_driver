@@ -1,4 +1,4 @@
-#EX106驱动程序
+#Head包程序
 ---
 上一版程序（当前master和old-master）：使用python的serial进行串口通信，对Dynamixel的EX106进行驱动。
 
@@ -17,7 +17,12 @@
 	catkin_make
 	rosrun Head head.py
 	
-	
+##功能
+---
+- 本 node 为 Head_data
+- 给 gait/head_angel 的 topic 发 msg
+- 给 Head/head_servo_angel 的 topic 发 msg	
+- 提供 /head_control 的 service 控制头部电机
 
 ##Structure
 ---
@@ -37,8 +42,10 @@
 - time
 
 ##ToDo
+---
 
-- ~~msg~~
+- 和决策确定接口和PID使用方法
+- ~~添加2个msg，分别为头部姿态和头部电机转角~~
 - ~~给ROS添加 service~~
 - ~~评估工作量修改底层驱动代码工作量~~
 - ~~修改底层代码~~
