@@ -19,10 +19,11 @@
 	
 ##功能
 ---
-- 本 node 为 Head_data
-- 给 gait/head_angel 的 topic 发 msg
-- 给 Head/head_servo_angel 的 topic 发 msg	
-- 提供 /head_control 的 service 控制头部电机
+-  node 为 /Head_data
+	- 给 gait/head_angel 的 topic 发 msg
+-  node wei /head_control_server
+	- 给 Head/head_servo_angel 的 topic 发 msg	
+	- 提供 /head_control_withPID 的 service 控制头部电机
 
 ##Structure
 ---
@@ -44,7 +45,7 @@
 ##ToDo
 ---
 
-- 和决策确定接口和PID使用方法
+- ~~和决策确定接口和PID使用方法~~
 - ~~添加2个msg，分别为头部姿态和头部电机转角~~
 - ~~给ROS添加 service~~
 - ~~评估工作量修改底层驱动代码工作量~~
