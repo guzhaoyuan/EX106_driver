@@ -10,10 +10,16 @@ from operator import add
 from Head.msg import head_pose 
 #from gait.msg import head_angle_msg
 from Head.srv import head_control
+from Head.msg import head_servo_angel
+
 
 Pi = 3.1415926
-pub = rospy.Publisher('gait/head_angle',head_pose,queue_size=101)
-rospy.init_node('IMU_data',anonymous=True)
+#publish msg to head_angel.msg
+pub_imu = rospy.Publisher('gait/head_angle',head_pose,queue_size=101)
+#publish msg to head_servo_angel.msg 
+pub_servo = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
+#init a node
+rospy.init_node('Head_data',anonymous=True)
 
 
 #servo init angel
@@ -69,6 +75,9 @@ def keep_position(target,pose):
 	print(current_pitch)
 #	sync_write_angel(1,current_yaw,2,current_pitch)
 	head_client.sync_write_angel_client(current_yaw,current_pitch,0)
+	pub_servo.publish(current_pitch,current_yaw)
+        #send servo pose every after servo move
+
 
 #读num组数据做平均做出初始值
 def get_average_IMU(num):
@@ -84,6 +93,8 @@ if __name__ == '__main__':
 
 	#init head posion (0 , 0)
 	head_client.sync_write_angel_client(init_yaw,init_pitch,0)
+	pub_imu.publish(init_pitch,init_yaw)
+        #send servo pose every after servo move
 
 	for num in range(1,100): #读200组数据扔掉
 		pose = readIMU.readData()
@@ -92,6 +103,6 @@ if __name__ == '__main__':
 	
 	while True:
 		temp = get_average_IMU(2) #读4组数据做平均作为当前姿态
-		pub.publish(head_pose(temp[2],temp[0]))
+		pub_imu.publish(temp[2],temp[0])
 		readIMU.flush()
   		keep_position(target,temp)
