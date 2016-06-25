@@ -40,7 +40,7 @@ def handle_head_control(req):
 #server init, receive yaw and pitch
 def head_control_server():
 	rospy.init_node('head_control_server')
-	s = rospy.Service('head_control',head_control,handle_head_control)
+	s = rospy.Service('head_control_withPID',head_control,handle_head_control)
 	print "head control server ready"
 	ros.spin()
 
@@ -105,4 +105,4 @@ if __name__ == '__main__':
 		temp = get_average_IMU(2) #读4组数据做平均作为当前姿态
 		pub_imu.publish(temp[2],temp[0])
 		readIMU.flush()
-  		keep_position(target,temp)
+  	keep_position(target,temp)
