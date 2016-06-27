@@ -7,16 +7,12 @@ import pid
 import rospy
 import head_client
 from operator import add
-from Head.msg import head_pose 
 #from gait.msg import head_angle_msg
 from Head.srv import head_control
 from Head.msg import head_servo_angel
-
+from Head.msg import head_pose
 
 Pi = 3.1415926
-
-#publish msg to head_servo_angel.msg 
-pub_servo = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
 
 #servo init angel
 init_pitch = 0
@@ -27,20 +23,12 @@ init_yaw = 0
 current_pitch = init_pitch
 current_yaw = init_yaw
 
-#callback function receive pitch[-Pi/2,Pi/2] and yaw[-Pi,Pi] and call security service directly
-def handle_head_control(req):
-	pitch = (req.pitch)
-	yaw = (req.yaw)
-	head_client.sync_write_angel_client(yaw,pitch,0)
-	return 0
-
-#server init, receive yaw and pitch
-def head_control_server():
-	rospy.init_node('head_control_server')
-	s = rospy.Service('head_control_withPID',head_control,handle_head_control)
-	print "head control server ready"
-	rospy.spin()
-
+#变量控制是否进行PID
+init_PID = 0
+#初始化目标角度
+target = [0,0,0]#pitch roll yaw
+#建立一个listener
+rospy.Subscriber('Head/head_angle', head_pose, callback)
 
 #该函数用于保持头部平衡
 def keep_position(target,pose):
@@ -73,8 +61,36 @@ def keep_position(target,pose):
 #	sync_write_angel(1,current_yaw,2,current_pitch)
 	head_client.sync_write_angel_client(current_yaw,current_pitch,0)
 	pub_servo.publish(current_pitch,current_yaw)
-        #send servo pose every after servo move
+	#send servo pose every after servo move
+
+def callback(data):
+	if init_PID == 0:#如果不需要PID，则传来的msg用于更新target
+		target = [data.pitch,0,data.yaw]
+	else:#一旦需要PID，将target设为目标角度
+		pose = [data.pitch,0,data.yaw]
+		keep_position(target,pose)
+
+#callback function receive pitch[-Pi/2,Pi/2] and yaw[-Pi,Pi] and call security service directly
+def handle_head_control(req):
+	pitch = (req.pitch)
+	yaw = (req.yaw)
+	head_client.sync_write_angel_client(yaw,pitch,0)
+	pub_servo.publish(pitch,yaw)
+	init_PID = req.PID
+	return 0
+
+#server init, receive yaw and pitch
+def head_control_server():
+	#publish msg to head_servo_angel.msg 
+	pub_servo = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
+	rospy.init_node('head_control_server')
+	s = rospy.Service('head_control_withPID',head_control,handle_head_control)
+	print "head control server ready"
+	rospy.spin()
 
 #主函数
 if __name__ == '__main__':
-	head_control_server()	
+	try:
+		head_control_server()	
+	except rospy.ROSInterruptException:
+		pass
