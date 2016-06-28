@@ -1,8 +1,10 @@
 #Head包程序
 ---
-上一版程序（当前master和old-master）：使用python的serial进行串口通信，对Dynamixel的EX106进行驱动。
+早前版程序（当前master和old-master）：使用python的serial进行串口通信，对Dynamixel的EX106进行驱动。
 
-最新版程序(ros分支)：使用python与arduino的serial进行通讯读取IMU，利用service驱动头部电机，并且发送msg给Head/head_pose
+上一版程序(ros分支，能够正常工作)：使用python与arduino的serial进行通讯读取IMU，利用service驱动头部电机，并且发送msg给gait/head_pose
+
+当前分支(master分支)：在ros基础上增加了可选择的PID控制，roslaunch
 
 
 ##Usage
