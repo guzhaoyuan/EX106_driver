@@ -1,0 +1,13 @@
+<launch>
+	
+<node
+	pkg="Head"	
+	name="Head_data"
+	type="head2.py"/>
+
+<node
+        pkg="Head"
+        name="head_control_server"
+        type="head_server_pid.py"/>
+
+</launch>
