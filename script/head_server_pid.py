@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 import time
-import readIMU
+#import readIMU
 import pid
 import rospy
 import head_client
@@ -27,8 +27,7 @@ current_yaw = init_yaw
 init_PID = 0
 #初始化目标角度
 target = [0,0,0]#pitch roll yaw
-#建立一个listener
-rospy.Subscriber('Head/head_angle', head_pose, callback)
+
 
 #该函数用于保持头部平衡
 def keep_position(target,pose):
@@ -82,11 +81,17 @@ def handle_head_control(req):
 #server init, receive yaw and pitch
 def head_control_server():
 	#publish msg to head_servo_angel.msg 
-	pub_servo = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
 	rospy.init_node('head_control_server')
 	s = rospy.Service('head_control_withPID',head_control,handle_head_control)
 	print "head control server ready"
 	rospy.spin()
+
+#publish msg to head_servo_angel.msg 
+pub_servo = rospy.Publisher('Head/head_servo_angel',head_servo_angel,queue_size=100)
+
+#建立一个listener
+rospy.Subscriber('Head/head_angle', head_pose, callback)
+
 
 #主函数
 if __name__ == '__main__':
