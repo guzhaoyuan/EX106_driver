@@ -72,8 +72,8 @@ def callback(data):
 
 #callback function receive pitch[-Pi/2,Pi/2] and yaw[-Pi,Pi] and call security service directly
 def handle_head_control(req):
-	pitch = (req.pitch)
-	yaw = (req.yaw)
+	pitch = (req.pitch)/2
+	yaw = (req.yaw)/2
 	head_client.sync_write_angel_client(yaw,pitch,0)
 	pub_servo.publish(pitch,yaw)
 	init_PID = req.PID
